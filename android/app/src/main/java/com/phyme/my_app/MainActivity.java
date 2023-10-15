@@ -1,4 +1,4 @@
-package com.phyme.my_app;
+package com.phyme.mynotes;
 
 import io.flutter.embedding.android.FlutterActivity;
 

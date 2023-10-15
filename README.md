@@ -1,4 +1,4 @@
-# my_app
+# mynotes
 
 A new Flutter project.
 
@@ -14,3 +14,16 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+What do we want to start with?
+
+Features:
+- Basic list
+- add or remove from list with slide left and right
+- Bottom of the page should show "completed" vs "removed"
+- multiple lists
+- options on the list?
+  - view prices
+  - total of the list
+  - ...
