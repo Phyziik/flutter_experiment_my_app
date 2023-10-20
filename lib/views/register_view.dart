@@ -1,17 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/firebase_options.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<RegisterView> createState() => _RegisterViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
 
@@ -28,11 +27,10 @@ class _LoginViewState extends State<LoginView> {
     _password.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login"),),
+      appBar: AppBar(title: const Text('Register')),
       body: Column(
         children: [
           TextField(
@@ -54,31 +52,32 @@ class _LoginViewState extends State<LoginView> {
             autocorrect: false,
           ),
           TextButton(
-            child: Text("Login"),
+            child: Text("Register"),
             onPressed: () async {
               final email = _email.text;
               final password = _password.text;
 
               try {
                 final userCredential = await FirebaseAuth.instance
-                    .signInWithEmailAndPassword(email: email, password: password);
+                    .createUserWithEmailAndPassword(
+                    email: email, password: password);
                 print(userCredential);
               } on FirebaseAuthException catch (e) {
-                if (e.code == "INVALID_LOGIN_CREDENTIALS") {
-                  print("Wrong credentials");
-                } else {
+                if(e.code == "weak-password" || e.code == "email-already-in-use" || e.code == "invalid-email") {
+                  print(e.message);
+                }
+                else{
                   print("Unhandled code ${e.code}");
                 }
               }
             },
           ),
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil("/register", (route) => false);
-              },
-              child: const Text("Not registered yet? Register here!"))
+          TextButton(onPressed: (){
+            Navigator.of(context).pushNamedAndRemoveUntil("/login", (route) => false);
+          }, child: const Text("Already registered? Login here!"))
         ],
       ),
     );
   }
 }
+
