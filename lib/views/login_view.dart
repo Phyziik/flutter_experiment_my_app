@@ -2,8 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/firebase_options.dart';
 import 'dart:developer' as devtools show log;
+
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -33,22 +36,42 @@ class _LoginViewState extends State<LoginView> {
   }
 
   submitLogin() async {
-    if(_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate()) {
       final email = _email.text;
       final password = _password.text;
 
       try {
         final userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
-        Navigator.of(context).pushNamedAndRemoveUntil(
-            "/notes/", (route) => false);
+        if(!context.mounted) return;
+        final user = FirebaseAuth.instance.currentUser;
+        if(user?.emailVerified ?? false){
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil(notesRoute, (route) => false);
+        }
+        else {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil(verifyEmailRoute, (route) => false);
+        }
         devtools.log(userCredential.toString());
       } on FirebaseAuthException catch (e) {
+        if(!context.mounted) return;
         if (e.code == "INVALID_LOGIN_CREDENTIALS") {
-          print("Wrong credentials");
+          await showErrorDialog(
+            context,
+            'Wrong credentials',
+          );
         } else {
-          print("Unhandled code ${e.code}");
+          await showErrorDialog(
+            context,
+            e.code,
+          );
         }
+      } catch(e){
+        await showErrorDialog(
+          context,
+          e.toString(),
+        );
       }
     }
   }
@@ -56,9 +79,11 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login"),),
+      appBar: AppBar(
+        title: const Text("Login"),
+      ),
       body: Form(
-        key:_formKey,
+        key: _formKey,
         child: Column(
           children: [
             TextFormField(
@@ -93,7 +118,8 @@ class _LoginViewState extends State<LoginView> {
             ),
             TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil("/register/", (route) => false);
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil("/register/", (route) => false);
                 },
                 child: const Text("Not registered yet? Register here!"))
           ],

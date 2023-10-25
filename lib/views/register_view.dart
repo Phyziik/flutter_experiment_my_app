@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/firebase_options.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -27,6 +29,7 @@ class _RegisterViewState extends State<RegisterView> {
     _password.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,26 +63,31 @@ class _RegisterViewState extends State<RegisterView> {
               try {
                 final userCredential = await FirebaseAuth.instance
                     .createUserWithEmailAndPassword(
-                    email: email, password: password);
+                        email: email, password: password);
                 print(userCredential);
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                    "/login/", (route) => false);
+                Navigator.of(context)
+                    .pushNamed(verifyEmailRoute);
               } on FirebaseAuthException catch (e) {
-                if(e.code == "weak-password" || e.code == "email-already-in-use" || e.code == "invalid-email") {
-                  print(e.message);
-                }
-                else{
-                  print("Unhandled code ${e.code}");
-                }
+                await showErrorDialog(
+                  context,
+                  e.code,
+                );
+              } catch (e) {
+                await showErrorDialog(
+                  context,
+                  e.toString(),
+                );
               }
             },
           ),
-          TextButton(onPressed: (){
-            Navigator.of(context).pushNamedAndRemoveUntil("/login/", (route) => false);
-          }, child: const Text("Already registered? Login here!"))
+          TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil("/login/", (route) => false);
+              },
+              child: const Text("Already registered? Login here!"))
         ],
       ),
     );
   }
 }
-
